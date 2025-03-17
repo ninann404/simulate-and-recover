@@ -321,8 +321,8 @@ class TestIntegration(unittest.TestCase):
             self.assertAlmostEqual(T_true, T_est, places=1)
             print("✓ Recovered parameters are close to true parameters")
     
-    def test_bias_decreases_with_n(self):
-        """Test that parameter recovery bias decreases as N increases."""
+    def test_squared_error_decreases_with_n(self):
+        """Test that squared error decreases as N increases."""
         # Run a small simulation with different N values
         summary = simulate.run_simulation(
             sample_sizes=[10, 100, 1000], 
