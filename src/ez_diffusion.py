@@ -93,34 +93,26 @@ class EZDiffusion: # written with zotgpt - claude sonnet 3.7
     def simulate(self, Rpred, Mpred, Vpred, N):
         """
         Simulate observed summary statistics based on predicted statistics and sample size.
-        
-        Parameters:
-        -----------
-        Rpred : float
-            Predicted response proportion
-        Mpred : float
-            Predicted mean response time
-        Vpred : float
-            Predicted variance of response time
-        N : int
-            Sample size
-            
-        Returns:
-        --------
-        tuple
-            (Robs, Mobs, Vobs) - observed response proportion, mean RT, and variance of RT
+        Uses equations 7-9 from the EZ diffusion model.
         """
         # Equation 7: Simulate observed response proportion using Binomial
-        n_correct = stats.binom.rvs(n=N, p=Rpred)
+        n_correct = np.random.binomial(n=N, p=Rpred)
+        
+        # Handle edge cases to ensure Robs is strictly between 0 and 1
+        if n_correct == 0:
+            n_correct = 0.5  # Add a small correction
+        elif n_correct == N:
+            n_correct = N - 0.5  # Add a small correction
+            
         Robs = n_correct / N
         
         # Equation 8: Simulate observed mean using Normal
-        Mobs = stats.norm.rvs(loc=Mpred, scale=np.sqrt(Vpred/N))
+        Mobs = np.random.normal(loc=Mpred, scale=np.sqrt(Vpred/N))
         
         # Equation 9: Simulate observed variance using Gamma
         shape = (N - 1) / 2
         scale = 2 * Vpred / (N - 1)
-        Vobs = max(stats.gamma.rvs(a=shape, scale=scale), 1e-6)
-
+        Vobs = np.random.gamma(shape=shape, scale=scale)
+        
         return Robs, Mobs, Vobs
     
