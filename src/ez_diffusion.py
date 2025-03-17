@@ -37,7 +37,7 @@ class EZDiffusion: # written with zotgpt - claude sonnet 3.7
         y = np.exp(-a * v)
         
         # Equation 1: Response proportion
-        Rpred = y / (y + 1)
+        Rpred = 1 / (y + 1)
         
         # Equation 2: Mean response time
         Mpred = T + (a / (2 * v)) * ((1 - y) / (1 + y))
@@ -77,16 +77,15 @@ class EZDiffusion: # written with zotgpt - claude sonnet 3.7
         # Equation 4: Estimated drift rate
         sign = 1 if Robs > 0.5 else -1
         numerator = L * (Robs**2 * L - Robs * L + Robs - 0.5)
-        if numerator <= 0 or Vobs <= 0:
-            raise ValueError("Invalid statistics: numerator or Vobs is non-positive")
-        vest = sign * np.power(numerator / Vobs, 0.25)  # 4th root
+        vest = sign * np.power(numerator / Vobs, 0.25)
         
         # Equation 5: Estimated boundary separation
         aest = L / vest
         
         # Equation 6: Estimated non-decision time
-        numerator = 1 - np.exp(-vest * aest)
-        denominator = 1 + np.exp(-vest * aest)
+        exp_term = np.exp(-vest * aest)
+        numerator = 1 - exp_term
+        denominator = 1 + exp_term
         Test = Mobs - (aest / (2 * vest)) * (numerator / denominator)
         
         return vest, aest, Test
@@ -121,7 +120,7 @@ class EZDiffusion: # written with zotgpt - claude sonnet 3.7
         # Equation 9: Simulate observed variance using Gamma
         shape = (N - 1) / 2
         scale = 2 * Vpred / (N - 1)
-        Vobs = stats.gamma.rvs(a=shape, scale=scale)
-        
+        Vobs = max(stats.gamma.rvs(a=shape, scale=scale), 1e-6)
+
         return Robs, Mobs, Vobs
     
