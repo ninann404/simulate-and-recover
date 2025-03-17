@@ -1,11 +1,13 @@
-# src/main.sh
 #!/bin/bash
-# written with zotgpt - claude sonnet 3.7 
-# Navigate to the script's directory
-cd "$(dirname "$0")"
+
+# main.sh - Run the EZ diffusion simulate-and-recover exercise
+#written using zotgpt - claude sonnet 3.7
+echo "Running EZ Diffusion Simulate-and-Recover Exercise"
+
+# Navigate to the src directory (if script is run from project root)
+cd "$(dirname "$0")" || cd src
 
 # Run the simulation
-echo "Running EZ diffusion simulate-and-recover exercise..."
 python simulate.py
 
-echo "Simulation complete. Results saved in the results directory."
+echo "Simulation complete!"

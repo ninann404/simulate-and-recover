@@ -1,8 +1,9 @@
+#written using zotgpt - claude sonnet 3.7
 # src/ez_diffusion.py
 import numpy as np
 from scipy import stats
 
-class EZDiffusion: # written with zotgpt - claude sonnet 3.7 
+class EZDiffusion: 
     """
     Implementation of the EZ Diffusion model with forward and inverse equations.
     """
