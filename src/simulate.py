@@ -99,11 +99,11 @@ def run_simulation(sample_sizes=[10, 40, 4000], iterations=1000):
             'T_mse': np.mean(results[N]['T_squared_error'])
         }
         
-        # Print summary statistics
+        '''# Print summary statistics
         print(f"\nSummary for N = {N}:")
         print(f"  Drift rate (v) - Bias: {summary[N]['v_bias_mean']:.6f} ± {summary[N]['v_bias_std']:.6f}, MSE: {summary[N]['v_mse']:.6f}")
         print(f"  Boundary separation (a) - Bias: {summary[N]['a_bias_mean']:.6f} ± {summary[N]['a_bias_std']:.6f}, MSE: {summary[N]['a_mse']:.6f}")
-        print(f"  Non-decision time (T) - Bias: {summary[N]['T_bias_mean']:.6f} ± {summary[N]['T_bias_std']:.6f}, MSE: {summary[N]['T_mse']:.6f}")
+        print(f"  Non-decision time (T) - Bias: {summary[N]['T_bias_mean']:.6f} ± {summary[N]['T_bias_std']:.6f}, MSE: {summary[N]['T_mse']:.6f}")'''
 
     return summary
 

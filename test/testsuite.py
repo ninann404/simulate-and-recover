@@ -132,7 +132,7 @@ class TestEZDiffusion(unittest.TestCase):
             print(f"✓ Case {i+1}: Correctly raised ValueError for invalid inputs R={Robs}, M={Mobs}, V={Vobs}")
         
     def test_parameter_recovery_no_noise(self):
-        """Test that parameters can be recovered exactly when there is no noise."""
+        """Test that parameters can be recovered exactly when there is no noise, bias should be 0."""
         # Test with multiple parameter sets
         test_cases = [
             (1.0, 1.0, 0.3),
@@ -324,7 +324,6 @@ class TestIntegration(unittest.TestCase):
     def test_bias_decreases_with_n(self):
         """Test that parameter recovery bias decreases as N increases."""
         # Run a small simulation with different N values
-        print("Running small simulation to test bias vs. sample size...")
         summary = simulate.run_simulation(
             sample_sizes=[10, 100, 1000], 
             iterations=10
@@ -351,6 +350,74 @@ class TestIntegration(unittest.TestCase):
                 print("✓ MSE for T decreases as sample size increases")
         except Exception as e:
             self.fail(f"Failed to calculate MSE comparison: {e}")
+            
+    def test_bias_averages_to_zero(self):
+        """explicitly test if bias averages to 0."""
+        print("\nTesting if parameter recovery bias averages to zero...")
+        
+        # Run a simulation with moderate sample size and many iterations
+        # for statistical reliability
+        iterations = 100
+        N = 1000
+        
+        # Initialize arrays to store bias values
+        v_biases = []
+        a_biases = []
+        T_biases = []
+        
+        # Set random seed for reproducibility
+        np.random.seed(42)
+        
+        # Run multiple iterations
+        for i in range(iterations):
+            if i % 20 == 0:
+                print(f"  Iteration {i}/{iterations}")
+            
+            # 1. Select true parameters within valid ranges
+            v_true = np.random.uniform(0.5, 2)
+            a_true = np.random.uniform(0.5, 2)
+            T_true = np.random.uniform(0.1, 0.5)
+            
+            # 2. Generate predicted summary statistics
+            Rpred, Mpred, Vpred = self.ez.forward(v_true, a_true, T_true)
+            
+            # 3. Simulate observed summary statistics
+            Robs, Mobs, Vobs = self.ez.simulate(Rpred, Mpred, Vpred, N)
+            
+            # 4. Recover parameters
+            v_est, a_est, T_est = self.ez.inverse(Robs, Mobs, Vobs)
+            
+            # 5. Calculate bias
+            v_bias = v_est - v_true
+            a_bias = a_est - a_true
+            T_bias = T_est - T_true
+            
+            # Store biases
+            v_biases.append(v_bias)
+            a_biases.append(a_bias)
+            T_biases.append(T_bias)
+        
+        # Calculate mean biases
+        mean_v_bias = np.mean(v_biases)
+        mean_a_bias = np.mean(a_biases)
+        mean_T_bias = np.mean(T_biases)
+        
+        # Calculate standard errors
+        se_v_bias = np.std(v_biases) / np.sqrt(iterations)
+        se_a_bias = np.std(a_biases) / np.sqrt(iterations)
+        se_T_bias = np.std(T_biases) / np.sqrt(iterations)
+        
+        print(f"Mean bias for v: {mean_v_bias:.6f} ± {se_v_bias:.6f}")
+        print(f"Mean bias for a: {mean_a_bias:.6f} ± {se_a_bias:.6f}")
+        print(f"Mean bias for T: {mean_T_bias:.6f} ± {se_T_bias:.6f}")
+        
+        # Test that biases are not significantly different from zero
+        # Using a 3-sigma rule (99.7% confidence)
+        self.assertTrue(abs(mean_v_bias) < 3 * se_v_bias)
+        self.assertTrue(abs(mean_a_bias) < 3 * se_a_bias)
+        self.assertTrue(abs(mean_T_bias) < 3 * se_T_bias)
+        
+        print("✓ All parameter biases are not significantly different from zero")
 
 
 def print_test_summary(result, start_time):
